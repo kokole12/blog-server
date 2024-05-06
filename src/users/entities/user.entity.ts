@@ -1,12 +1,12 @@
 import {
-  BeforeInsert,
-  BeforeUpdate,
+  // BeforeInsert,
+  // BeforeUpdate,
   Column,
   Entity,
   PrimaryGeneratedColumn,
   Unique,
 } from 'typeorm';
-import * as bcrypt from 'bcrypt';
+// import * as bcrypt from 'bcrypt';
 
 @Entity()
 export class User {
@@ -23,12 +23,12 @@ export class User {
   @Column()
   password: string;
 
-  @BeforeInsert()
-  @BeforeUpdate()
-  async hashPassword() {
-    if (this.password) {
-      const saltRounds = 10;
-      this.password = await bcrypt.hash(this.password, saltRounds);
-    }
-  }
+  // @BeforeInsert()
+  // @BeforeUpdate()
+  // async hashPassword() {
+  //   if (this.password) {
+  //     const saltRounds = 10;
+  //     this.password = await bcrypt.hash(this.password, saltRounds);
+  //   }
+  // }
 }
