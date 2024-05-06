@@ -7,6 +7,7 @@ import { Repository } from 'typeorm';
 import { InjectQueue } from '@nestjs/bull';
 import { Queue } from 'bull';
 import { Email_Queue } from '../constants';
+import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class UsersService {
@@ -30,6 +31,11 @@ export class UsersService {
     if (user) {
       throw new HttpException('Email already taken', HttpStatus.BAD_REQUEST);
     }
+    const saltRounds = 10;
+    createUserDto.password = await bcrypt.hash(
+      createUserDto.password,
+      saltRounds,
+    );
     await this.sendEmail(createUserDto.email);
     return this.userRepository.save(createUserDto);
   }
