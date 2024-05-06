@@ -26,6 +26,6 @@ import { Email_Queue } from 'src/constants';
   ],
   controllers: [UsersController],
   providers: [UsersService],
-  exports: [TypeOrmModule],
+  exports: [TypeOrmModule, UsersService],
 })
 export class UsersModule {}
