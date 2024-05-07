@@ -1,12 +1,5 @@
-import {
-  // BeforeInsert,
-  // BeforeUpdate,
-  Column,
-  Entity,
-  PrimaryGeneratedColumn,
-  Unique,
-} from 'typeorm';
-// import * as bcrypt from 'bcrypt';
+import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
+import { Article } from 'src/articles/entities/article.entity'; // Adjust the path as needed
 
 @Entity()
 export class User {
@@ -17,18 +10,11 @@ export class User {
   username: string;
 
   @Column()
-  @Unique(['email'])
   email: string;
 
   @Column()
   password: string;
 
-  // @BeforeInsert()
-  // @BeforeUpdate()
-  // async hashPassword() {
-  //   if (this.password) {
-  //     const saltRounds = 10;
-  //     this.password = await bcrypt.hash(this.password, saltRounds);
-  //   }
-  // }
+  @OneToMany(() => Article, (article) => article.author)
+  articles: Article[];
 }
