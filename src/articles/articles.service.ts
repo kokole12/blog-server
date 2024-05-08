@@ -1,9 +1,10 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Req } from '@nestjs/common';
 import { CreateArticleDto } from './dto/create-article.dto';
 import { Repository } from 'typeorm';
 import { Article } from './entities/article.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { UsersService } from 'src/users/users.service';
+import { Request } from 'express';
 
 @Injectable()
 export class ArticlesService {
@@ -12,7 +13,9 @@ export class ArticlesService {
     private readonly articleRepository: Repository<Article>,
     private readonly userService: UsersService,
   ) {}
-  create(createArticleDto: CreateArticleDto) {
+  create(createArticleDto: CreateArticleDto, @Req() req: Request) {
+    const headers = req.headers;
+    console.log(JSON.stringify(headers));
     return this.articleRepository.save(createArticleDto);
   }
 

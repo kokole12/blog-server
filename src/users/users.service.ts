@@ -1,4 +1,4 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable, Req } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -40,7 +40,8 @@ export class UsersService {
     return this.userRepository.save(createUserDto);
   }
 
-  findAll(): Promise<User[]> {
+  findAll(@Req() req: Request): Promise<User[]> {
+    console.log(JSON.stringify(req.headers));
     return this.userRepository.find();
   }
 
