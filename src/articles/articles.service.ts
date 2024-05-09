@@ -14,8 +14,9 @@ export class ArticlesService {
     private readonly userService: UsersService,
   ) {}
   create(createArticleDto: CreateArticleDto, @Req() req: Request) {
-    const headers = req.headers;
-    console.log(JSON.stringify(headers));
+    const headers = req.headers['authorization'];
+    const token = headers.split(' ')[1];
+    console.log(token);
     return this.articleRepository.save(createArticleDto);
   }
 

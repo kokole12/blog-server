@@ -1,7 +1,9 @@
 import {
   Injectable,
   ExecutionContext,
-  UnauthorizedException,
+  Logger,
+  HttpException,
+  HttpStatus,
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { Observable } from 'rxjs';
@@ -9,6 +11,8 @@ import { JwtService } from '@nestjs/jwt';
 
 @Injectable()
 export class JwtAuthGuard extends AuthGuard('jwt') {
+  private readonly logger = new Logger();
+
   constructor(private readonly jwtService: JwtService) {
     super();
   }
@@ -26,10 +30,10 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
     const token = this.extractJwtFromRequest(request);
 
     if (!token) {
-      throw new UnauthorizedException('Access token is missing');
+      throw new HttpException('Access token is missing', HttpStatus.FORBIDDEN);
     }
 
-    throw new UnauthorizedException('Invalid access token');
+    throw new HttpException('Access token is missing', HttpStatus.FORBIDDEN);
   }
 
   private extractJwtFromRequest(request): string | null {
@@ -37,6 +41,7 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
 
     if (authHeader) {
       const token = authHeader.split(' ')[1];
+      this.logger.log(token);
       return token;
     }
 

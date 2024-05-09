@@ -6,20 +6,25 @@ import {
   Param,
   Delete,
   Req,
+  UseGuards,
 } from '@nestjs/common';
 import { ArticlesService } from './articles.service';
 import { CreateArticleDto } from './dto/create-article.dto';
 import { Request } from 'express';
+import { JwtAuthGuard } from 'src/guards/auth.guard';
+import { AuthGuard } from '@nestjs/passport';
 
 @Controller('articles')
 export class ArticlesController {
   constructor(private readonly articlesService: ArticlesService) {}
 
+  @UseGuards(JwtAuthGuard)
   @Post()
   create(@Body() createArticleDto: CreateArticleDto, @Req() req: Request) {
     return this.articlesService.create(createArticleDto, req);
   }
 
+  @UseGuards(AuthGuard('jwt'))
   @Get()
   findAll() {
     return this.articlesService.findAll();
