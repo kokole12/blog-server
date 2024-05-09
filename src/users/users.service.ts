@@ -8,6 +8,8 @@ import { InjectQueue } from '@nestjs/bull';
 import { Queue } from 'bull';
 import { Email_Queue } from '../constants';
 import * as bcrypt from 'bcrypt';
+import { from, Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
 
 @Injectable()
 export class UsersService {
@@ -16,19 +18,17 @@ export class UsersService {
     @InjectQueue(Email_Queue) private readonly emailQueue: Queue,
   ) {}
 
-  async findUserById(id: number) {
-    const user = await this.userRepository.findOneBy({ id });
-    return user;
+  async findUserById(id: number): Promise<User | undefined> {
+    return this.userRepository.findOne(id);
   }
 
-  async findUserByEmail(email: string): Promise<User> {
-    const user = await this.userRepository.findOneBy({ email });
-    return user;
+  async findUserByEmail(email: string): Promise<User | undefined> {
+    return this.userRepository.findOne({ where: { email } });
   }
 
-  async create(createUserDto: CreateUserDto) {
-    const user = await this.findUserByEmail(createUserDto.email);
-    if (user) {
+  async create(createUserDto: CreateUserDto): Promise<User> {
+    const userExists = await this.findUserByEmail(createUserDto.email);
+    if (userExists) {
       throw new HttpException('Email already taken', HttpStatus.BAD_REQUEST);
     }
     const saltRounds = 10;
@@ -40,9 +40,14 @@ export class UsersService {
     return this.userRepository.save(createUserDto);
   }
 
-  findAll(@Req() req: Request): Promise<User[]> {
+  findAll(@Req() req: Request): Observable<User[]> {
     console.log(JSON.stringify(req.headers));
-    return this.userRepository.find();
+    return from(this.userRepository.find()).pipe(
+      map((users: User[]) => {
+        users.forEach((user) => delete user.password);
+        return users;
+      }),
+    );
   }
 
   async findOne(id: number): Promise<User> {
@@ -50,7 +55,7 @@ export class UsersService {
     if (!user) {
       throw new HttpException('User not found', HttpStatus.NOT_FOUND);
     }
-    return this.userRepository.findOneBy({ id });
+    return user;
   }
 
   async update(id: number, updateUserDto: UpdateUserDto): Promise<User> {
@@ -59,20 +64,18 @@ export class UsersService {
       throw new HttpException('User not found', HttpStatus.NOT_FOUND);
     }
     await this.userRepository.update(user.id, updateUserDto);
-    return { ...user, ...updateUserDto };
+    return this.findUserById(id); // Return updated user
   }
 
-  async remove(id: number) {
+  async remove(id: number): Promise<void> {
     const user = await this.findUserById(id);
     if (!user) {
       throw new HttpException('No user found', HttpStatus.NOT_FOUND);
     }
-    return this.userRepository.delete(id);
+    await this.userRepository.delete(id);
   }
 
-  async sendEmail(email: string) {
-    await this.emailQueue.add({
-      email: email,
-    });
+  async sendEmail(email: string): Promise<void> {
+    await this.emailQueue.add({ email });
   }
 }
