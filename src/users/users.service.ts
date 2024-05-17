@@ -1,4 +1,4 @@
-import { HttpException, HttpStatus, Injectable, Req } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -18,8 +18,8 @@ export class UsersService {
     @InjectQueue(Email_Queue) private readonly emailQueue: Queue,
   ) {}
 
-  async findUserById(id: number): Promise<User | undefined> {
-    return this.userRepository.findOne(id);
+  async findUserById(id): Promise<User | undefined> {
+    return await this.userRepository.findOne(id);
   }
 
   async findUserByEmail(email: string): Promise<User | undefined> {
@@ -40,8 +40,7 @@ export class UsersService {
     return this.userRepository.save(createUserDto);
   }
 
-  findAll(@Req() req: Request): Observable<User[]> {
-    console.log(JSON.stringify(req.headers));
+  findAll(): Observable<User[]> {
     return from(this.userRepository.find()).pipe(
       map((users: User[]) => {
         users.forEach((user) => delete user.password);
