@@ -10,6 +10,11 @@ import { Email_Queue } from '../constants';
 import * as bcrypt from 'bcrypt';
 import { from, Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
+import {
+  IPaginationOptions,
+  paginate,
+  Pagination,
+} from 'nestjs-typeorm-paginate';
 
 @Injectable()
 export class UsersService {
@@ -76,5 +81,12 @@ export class UsersService {
 
   async sendEmail(email: string): Promise<void> {
     await this.emailQueue.add({ email });
+  }
+
+  async paginate(options: IPaginationOptions): Promise<Pagination<User>> {
+    const qb = this.userRepository.createQueryBuilder('q');
+    qb.orderBy('q.id', 'DESC');
+
+    return paginate<User>(qb, options);
   }
 }
