@@ -7,12 +7,17 @@ import {
 } from '@nestjs/common';
 import { CreateArticleDto } from './dto/create-article.dto';
 import { Repository } from 'typeorm';
-import { Article } from './entities/article.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { UsersService } from 'src/users/users.service';
 import { Request } from 'express';
 import { JwtService } from '@nestjs/jwt';
 import { AuthService } from 'src/auth/auth.service';
+import {
+  IPaginationOptions,
+  paginate,
+  Pagination,
+} from 'nestjs-typeorm-paginate';
+import { Article } from './entities/article.entity';
 
 @Injectable()
 export class ArticlesService {
@@ -85,5 +90,12 @@ export class ArticlesService {
   }
   remove(id: number) {
     return `This action removes a #${id} article`;
+  }
+
+  async paginate(options: IPaginationOptions): Promise<Pagination<Article>> {
+    const qb = this.articleRepository.createQueryBuilder('q');
+    qb.orderBy('q.id', 'DESC');
+
+    return paginate<Article>(qb, options);
   }
 }

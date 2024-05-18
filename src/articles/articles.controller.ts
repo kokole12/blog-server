@@ -9,6 +9,9 @@ import {
   UseGuards,
   UseInterceptors,
   UploadedFile,
+  Query,
+  DefaultValuePipe,
+  ParseIntPipe,
 } from '@nestjs/common';
 import { ArticlesService } from './articles.service';
 import { CreateArticleDto } from './dto/create-article.dto';
@@ -18,6 +21,8 @@ import { ApiTags } from '@nestjs/swagger';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
 import { extname } from 'path';
+import { IPaginationOptions, Pagination } from 'nestjs-typeorm-paginate';
+import { Article } from './entities/article.entity';
 
 @ApiTags('Articles')
 @Controller('articles')
@@ -47,12 +52,17 @@ export class ArticlesController {
     return this.articlesService.create(createArticleDto, req, file);
   }
 
-  @UseGuards(AuthGuard('jwt'))
-  @Get()
-  findAll() {
-    return this.articlesService.findAll();
+  @Get('/')
+  async index(
+    @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number = 1,
+    @Query('limit', new DefaultValuePipe(10), ParseIntPipe) limit: number = 10,
+  ): Promise<Pagination<Article>> {
+    const options: IPaginationOptions = {
+      limit,
+      page,
+    };
+    return this.articlesService.paginate(options);
   }
-
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.articlesService.findOne(+id);
