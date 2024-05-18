@@ -2,6 +2,7 @@ import {
   HttpException,
   HttpStatus,
   Injectable,
+  Req,
   UnauthorizedException,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
@@ -10,6 +11,7 @@ import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class AuthService {
+  blockedList: string[] = [];
   constructor(
     private userService: UsersService,
     private jwtService: JwtService,
@@ -47,5 +49,19 @@ export class AuthService {
     const payload = { email: user.email, sub: user.id };
     const accessToken = this.jwtService.sign(payload);
     return { access_token: accessToken };
+  }
+
+  async logout(@Req() req: Request) {
+    console.log(this.blockedList);
+    const headers = req.headers['authorization'];
+    if (!headers) {
+      throw new HttpException('Unauthorised request', HttpStatus.UNAUTHORIZED);
+    }
+    const token = headers.split(' ')[1];
+
+    if (!token) {
+      throw new HttpException('Ivalid token', HttpStatus.BAD_REQUEST);
+    }
+    return this.blockedList.push(token);
   }
 }

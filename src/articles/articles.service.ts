@@ -12,6 +12,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { UsersService } from 'src/users/users.service';
 import { Request } from 'express';
 import { JwtService } from '@nestjs/jwt';
+import { AuthService } from 'src/auth/auth.service';
 
 @Injectable()
 export class ArticlesService {
@@ -20,6 +21,7 @@ export class ArticlesService {
     private readonly articleRepository: Repository<Article>,
     private readonly userService: UsersService,
     private readonly jwtService: JwtService,
+    private readonly authService: AuthService,
   ) {}
   async create(
     createArticleDto: CreateArticleDto,
@@ -32,6 +34,13 @@ export class ArticlesService {
       throw new HttpException('Authorization failed', HttpStatus.BAD_REQUEST);
     }
     const token = headers.split(' ')[1];
+    const isBlocked = this.authService.blockedList.some(
+      (blockedToken) => blockedToken === token,
+    );
+
+    if (isBlocked) {
+      throw new HttpException('expired session', HttpStatus.UNAUTHORIZED);
+    }
 
     if (!token) {
       throw new HttpException('Authorization failed', HttpStatus.BAD_REQUEST);
