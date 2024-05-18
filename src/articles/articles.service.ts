@@ -60,7 +60,7 @@ export class ArticlesService {
       createArticleDto.authorId = userId;
 
       if (file) {
-        createArticleDto.thumbnail = file.filename;
+        createArticleDto.thumbnail = file.path;
       }
 
       return await this.articleRepository.save(createArticleDto);
