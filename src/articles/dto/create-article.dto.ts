@@ -1,5 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsNotEmpty, IsString } from 'class-validator';
+import { User } from 'src/users/entities/user.entity';
 
 export class CreateArticleDto {
   @ApiProperty()
@@ -13,7 +14,7 @@ export class CreateArticleDto {
   content: string;
 
   @ApiProperty()
-  authorId?: number;
+  author?: User;
 
   @ApiProperty()
   thumbnail?: string;

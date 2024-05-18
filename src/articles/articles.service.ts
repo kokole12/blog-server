@@ -26,7 +26,6 @@ export class ArticlesService {
     @Req() req: Request,
     @UploadedFile() file: Express.Multer.File,
   ) {
-    console.log(file);
     const headers = req.headers['authorization'];
 
     if (!headers) {
@@ -48,16 +47,14 @@ export class ArticlesService {
         throw new Error('Invalid token');
       }
 
-      const userId: number = decodedToken['sub'];
+      const userId = decodedToken['sub'];
       if (isNaN(userId)) {
         throw new HttpException(
           'Invalid user ID in token',
           HttpStatus.BAD_REQUEST,
         );
       }
-      console.log('User ID:', userId);
-
-      createArticleDto.authorId = userId;
+      createArticleDto.author = userId;
 
       if (file) {
         createArticleDto.thumbnail = file.path;
