@@ -1,5 +1,4 @@
-import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
-import { User } from 'src/users/entities/user.entity';
+import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
 
 @Entity()
 export class Article {
@@ -12,24 +11,9 @@ export class Article {
   @Column()
   content: string;
 
-  @Column({ type: 'blob', nullable: true })
-  thumbnail: Buffer;
-
-  @ManyToOne(() => User, (user) => user.articles)
-  author: User;
-
-  @Column('simple-array')
-  comments: string[];
-
   @Column()
-  likes: number;
+  authorId: number;
 
-  @Column()
-  link: string;
-
-  @Column()
-  slug: string;
-
-  @Column('simple-array')
-  tags: string[];
+  @Column({ nullable: true })
+  thumbnail: string;
 }

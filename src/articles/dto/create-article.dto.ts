@@ -1,31 +1,20 @@
-import { IsNotEmpty, IsString, IsArray, IsNumber } from 'class-validator';
+import { ApiProperty } from '@nestjs/swagger';
+import { IsNotEmpty, IsString } from 'class-validator';
 
 export class CreateArticleDto {
+  @ApiProperty()
   @IsString()
   @IsNotEmpty()
   title: string;
 
+  @ApiProperty()
   @IsString()
   @IsNotEmpty()
   content: string;
 
-  thumbnail: Buffer;
+  @ApiProperty()
+  authorId?: number;
 
-  @IsNumber()
-  authorId: number;
-
-  @IsArray()
-  comments: string[];
-
-  @IsArray()
-  likes: number;
-
-  @IsString()
-  link: string;
-
-  @IsString()
-  slug: string;
-
-  @IsArray()
-  tags: string[];
+  @ApiProperty()
+  thumbnail?: string;
 }

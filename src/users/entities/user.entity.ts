@@ -1,5 +1,4 @@
-import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
-import { Article } from 'src/articles/entities/article.entity'; // Adjust the path as needed
+import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
 
 @Entity()
 export class User {
@@ -14,7 +13,4 @@ export class User {
 
   @Column()
   password: string;
-
-  @OneToMany(() => Article, (article) => article.author)
-  articles: Article[];
 }
