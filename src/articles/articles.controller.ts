@@ -29,7 +29,7 @@ export class ArticlesController {
   @UseInterceptors(
     FileInterceptor('thumbnail', {
       storage: diskStorage({
-        destination: './thumbnails',
+        destination: './uploads/thumbnails',
         filename: (req, file, callback) => {
           const uniqSuff = Date.now() + '-' + Math.random() * 1e9;
           const ext = extname(file.originalname);
