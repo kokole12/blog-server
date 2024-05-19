@@ -1,5 +1,12 @@
+import slugify from 'slugify';
 import { User } from 'src/users/entities/user.entity';
-import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  BeforeInsert,
+  Column,
+  Entity,
+  ManyToOne,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
 
 @Entity()
 export class Article {
@@ -17,4 +24,12 @@ export class Article {
 
   @Column({ nullable: true })
   thumbnail: string;
+
+  @Column({ unique: true })
+  slug?: string;
+
+  @BeforeInsert()
+  generateSlug() {
+    this.slug = slugify(this.title, { lower: true }) + '-' + Date.now();
+  }
 }

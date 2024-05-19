@@ -18,6 +18,7 @@ import {
   Pagination,
 } from 'nestjs-typeorm-paginate';
 import { Article } from './entities/article.entity';
+import { UpdateArticleDto } from './dto/update-article.dto';
 
 @Injectable()
 export class ArticlesService {
@@ -28,6 +29,11 @@ export class ArticlesService {
     private readonly jwtService: JwtService,
     private readonly authService: AuthService,
   ) {}
+
+  async findArticleById(id): Promise<Article> {
+    return this.articleRepository.findOne(id);
+  }
+
   async create(
     createArticleDto: CreateArticleDto,
     @Req() req: Request,
@@ -85,9 +91,21 @@ export class ArticlesService {
     return this.articleRepository.find();
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} article`;
+  async findOne(req: any, id: number): Promise<Article> {
+    console.log(req.user);
+    if (!req.user) {
+      throw new HttpException('Unauthorized', HttpStatus.UNAUTHORIZED);
+    }
+
+    const article = await this.articleRepository.findOneBy({ id });
+
+    if (!article) {
+      throw new HttpException(`No post with id ${id}`, HttpStatus.BAD_REQUEST);
+    }
+
+    return article;
   }
+
   remove(id: number) {
     return `This action removes a #${id} article`;
   }
@@ -97,5 +115,30 @@ export class ArticlesService {
     qb.orderBy('q.id', 'DESC');
 
     return paginate<Article>(qb, options);
+  }
+
+  async updateArticle(
+    req: any,
+    updateArticleDto: UpdateArticleDto,
+    id: number,
+  ): Promise<Article> {
+    console.log('req.user:', req.user);
+
+    const userId = req.user.userId;
+    console.log('userId:', userId);
+
+    try {
+      const article = await this.findArticleById(id);
+      if (!article) {
+        throw new HttpException('Article not found', HttpStatus.NOT_FOUND);
+      }
+      if (article.author !== userId) {
+        throw new HttpException('Unauthorized', HttpStatus.UNAUTHORIZED);
+      }
+      await this.articleRepository.update(id, updateArticleDto);
+      return await this.findArticleById(id);
+    } catch (error) {
+      throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
   }
 }

@@ -12,6 +12,7 @@ import {
   Query,
   DefaultValuePipe,
   ParseIntPipe,
+  Patch,
 } from '@nestjs/common';
 import { ArticlesService } from './articles.service';
 import { CreateArticleDto } from './dto/create-article.dto';
@@ -23,14 +24,15 @@ import { diskStorage } from 'multer';
 import { extname } from 'path';
 import { IPaginationOptions, Pagination } from 'nestjs-typeorm-paginate';
 import { Article } from './entities/article.entity';
+import { UpdateArticleDto } from './dto/update-article.dto';
 
 @ApiTags('Articles')
 @Controller('articles')
 export class ArticlesController {
   constructor(private readonly articlesService: ArticlesService) {}
 
-  @UseGuards(AuthGuard('jwt'))
   @Post()
+  @UseGuards(AuthGuard('jwt'))
   @UseInterceptors(
     FileInterceptor('thumbnail', {
       storage: diskStorage({
@@ -63,15 +65,22 @@ export class ArticlesController {
     };
     return this.articlesService.paginate(options);
   }
+
+  @UseGuards(AuthGuard('jwt'))
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.articlesService.findOne(+id);
+  findOne(@Param('id') id: number, @Req() req: any) {
+    return this.articlesService.findOne(req, id);
   }
 
-  // @Patch(':id')
-  // update(@Param('id') id: string, @Body() updateArticleDto: UpdateArticleDto) {
-  //   return this.articlesService.update(+id, updateArticleDto);
-  // }
+  @Patch(':id')
+  @UseGuards(AuthGuard('jwt'))
+  update(
+    @Param('id') id: number,
+    @Req() req: any,
+    @Body() updateArticleDto: UpdateArticleDto,
+  ) {
+    return this.articlesService.updateArticle(id, updateArticleDto, req);
+  }
 
   @Delete(':id')
   remove(@Param('id') id: string) {
