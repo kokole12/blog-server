@@ -1,3 +1,4 @@
+import { Article } from 'src/articles/entities/article.entity';
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { CreateArticleDto } from './dto/create-article.dto';
 import { Repository } from 'typeorm';
@@ -10,7 +11,6 @@ import {
   paginate,
   Pagination,
 } from 'nestjs-typeorm-paginate';
-import { Article } from './entities/article.entity';
 import { UpdateArticleDto } from './dto/update-article.dto';
 
 @Injectable()
@@ -145,5 +145,12 @@ export class ArticlesService {
       console.log(error);
       throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
     }
+  }
+
+  async getUserArticles(userId): Promise<Article[]> {
+    const userArticles = await this.articleRepository.find({
+      where: { author: userId },
+    });
+    return userArticles;
   }
 }

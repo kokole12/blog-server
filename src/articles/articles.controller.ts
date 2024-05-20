@@ -75,6 +75,12 @@ export class ArticlesController {
     return this.articlesService.findOne(req, id);
   }
 
+  @Get('user/:id')
+  @UseGuards(AuthGuard('jwt'))
+  getUserArticles(@Param() id: number): Promise<Article[]> {
+    return this.articlesService.getUserArticles(id);
+  }
+
   @Patch(':id')
   @UseGuards(AuthGuard('jwt'))
   update(
