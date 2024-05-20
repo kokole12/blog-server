@@ -19,17 +19,23 @@ export class Article {
   @Column()
   content: string;
 
-  @ManyToOne(() => User, (user) => user.articles)
+  @ManyToOne(() => User, (user) => user.articles, { eager: true })
   author: User;
 
   @Column({ nullable: true })
   thumbnail: string;
 
   @Column({ unique: true })
-  slug?: string;
+  slug: string;
 
   @BeforeInsert()
   generateSlug() {
-    this.slug = slugify(this.title, { lower: true }) + '-' + Date.now();
+    console.log('Generating slug for:', this);
+    if (this.title) {
+      this.slug = slugify(this.title, { lower: true }) + '-' + Date.now();
+      console.log('Generated slug:', this.slug);
+    } else {
+      console.error('Title is undefined:', this);
+    }
   }
 }

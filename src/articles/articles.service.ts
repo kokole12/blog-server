@@ -1,15 +1,8 @@
-import {
-  HttpException,
-  HttpStatus,
-  Injectable,
-  Req,
-  UploadedFile,
-} from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { CreateArticleDto } from './dto/create-article.dto';
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { UsersService } from 'src/users/users.service';
-import { Request } from 'express';
 import { JwtService } from '@nestjs/jwt';
 import { AuthService } from 'src/auth/auth.service';
 import {
@@ -31,19 +24,21 @@ export class ArticlesService {
   ) {}
 
   async findArticleById(id): Promise<Article> {
-    return this.articleRepository.findOne(id);
+    return this.articleRepository.findOneBy({ id });
   }
 
   async create(
     createArticleDto: CreateArticleDto,
-    @Req() req: Request,
-    @UploadedFile() file: Express.Multer.File,
+    req: any,
+    file: Express.Multer.File,
   ) {
-    const headers = req.headers['authorization'];
+    console.log('createArticleDto:', createArticleDto); // Debug log
 
+    const headers = req.headers['authorization'];
     if (!headers) {
       throw new HttpException('Authorization failed', HttpStatus.BAD_REQUEST);
     }
+
     const token = headers.split(' ')[1];
     const isBlocked = this.authService.blockedList.some(
       (blockedToken) => blockedToken === token,
@@ -56,9 +51,9 @@ export class ArticlesService {
     if (!token) {
       throw new HttpException('Authorization failed', HttpStatus.BAD_REQUEST);
     }
+
     try {
       const decodedToken = this.jwtService.decode(token);
-
       if (
         !decodedToken ||
         typeof decodedToken !== 'object' ||
@@ -80,15 +75,12 @@ export class ArticlesService {
         createArticleDto.thumbnail = file.path;
       }
 
-      return await this.articleRepository.save(createArticleDto);
+      const article = this.articleRepository.create(createArticleDto);
+      return await this.articleRepository.save(article);
     } catch (error) {
       console.error('Error decoding token:', error.message);
       throw new Error('Invalid token');
     }
-  }
-
-  findAll() {
-    return this.articleRepository.find();
   }
 
   async findOne(req: any, id: number): Promise<Article> {
@@ -106,10 +98,6 @@ export class ArticlesService {
     return article;
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} article`;
-  }
-
   async paginate(options: IPaginationOptions): Promise<Pagination<Article>> {
     const qb = this.articleRepository.createQueryBuilder('q');
     qb.orderBy('q.id', 'DESC');
@@ -122,22 +110,39 @@ export class ArticlesService {
     updateArticleDto: UpdateArticleDto,
     id: number,
   ): Promise<Article> {
-    console.log('req.user:', req.user);
-
     const userId = req.user.userId;
-    console.log('userId:', userId);
-
     try {
       const article = await this.findArticleById(id);
+
       if (!article) {
         throw new HttpException('Article not found', HttpStatus.NOT_FOUND);
       }
-      if (article.author !== userId) {
+      if (article.author.id !== userId) {
         throw new HttpException('Unauthorized', HttpStatus.UNAUTHORIZED);
       }
       await this.articleRepository.update(id, updateArticleDto);
       return await this.findArticleById(id);
     } catch (error) {
+      console.log(error);
+      throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+  }
+
+  async deleteArticle(req: any, id: number) {
+    const userId = req.user.userId;
+    try {
+      const article = await this.findArticleById(id);
+
+      if (!article) {
+        throw new HttpException('Article not found', HttpStatus.NOT_FOUND);
+      }
+      if (article.author.id !== userId) {
+        throw new HttpException('Unauthorized', HttpStatus.UNAUTHORIZED);
+      }
+      await this.articleRepository.delete(id);
+      return await this.findArticleById(id);
+    } catch (error) {
+      console.log(error);
       throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }

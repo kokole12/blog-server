@@ -18,4 +18,7 @@ export class CreateArticleDto {
 
   @ApiProperty()
   thumbnail?: string;
+
+  @ApiProperty()
+  slugs: string;
 }

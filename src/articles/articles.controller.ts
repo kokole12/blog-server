@@ -38,7 +38,10 @@ export class ArticlesController {
       storage: diskStorage({
         destination: './uploads/thumbnails',
         filename: (req, file, callback) => {
-          const uniqSuff = Date.now() + '-' + Math.random() * 1e9;
+          const uniqSuff =
+            Date.now() +
+            '-' +
+            Math.random().toFixed(9).toString().replace('.', '');
           const ext = extname(file.originalname);
           const filename = `${file.originalname}-${uniqSuff}${ext}`;
           callback(null, filename);
@@ -68,22 +71,23 @@ export class ArticlesController {
 
   @UseGuards(AuthGuard('jwt'))
   @Get(':id')
-  findOne(@Param('id') id: number, @Req() req: any) {
+  findOne(@Param('id', ParseIntPipe) id: number, @Req() req: Request) {
     return this.articlesService.findOne(req, id);
   }
 
   @Patch(':id')
   @UseGuards(AuthGuard('jwt'))
   update(
-    @Param('id') id: number,
+    @Param('id', ParseIntPipe) id: number,
     @Req() req: any,
     @Body() updateArticleDto: UpdateArticleDto,
   ) {
-    return this.articlesService.updateArticle(id, updateArticleDto, req);
+    return this.articlesService.updateArticle(req, updateArticleDto, id);
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.articlesService.remove(+id);
+  @UseGuards(AuthGuard('jwt'))
+  delete(@Param('id', ParseIntPipe) id: number, @Req() req: any) {
+    return this.articlesService.deleteArticle(req, id);
   }
 }

@@ -6,20 +6,26 @@ import { Article } from './entities/article.entity';
 import { UsersModule } from 'src/users/users.module';
 import { JwtStrategy } from 'src/auth/jwt.strategy';
 import { AuthModule } from 'src/auth/auth.module';
-import { JwtService } from '@nestjs/jwt';
+import { JwtModule, JwtService } from '@nestjs/jwt';
 import { MulterModule } from '@nestjs/platform-express';
+import { jwtConstants } from 'src/auth/constants';
+import { AuthService } from 'src/auth/auth.service';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([Article]),
     UsersModule,
+    JwtModule.register({
+      secret: jwtConstants.secret,
+      signOptions: { expiresIn: '30h' },
+    }),
     AuthModule,
     MulterModule.register({
       dest: './uploads',
     }),
   ],
   controllers: [ArticlesController],
-  providers: [ArticlesService, JwtStrategy, JwtService],
+  providers: [ArticlesService, JwtStrategy, JwtService, AuthService],
   exports: [TypeOrmModule],
 })
 export class ArticlesModule {}
