@@ -10,10 +10,11 @@ import { JwtModule, JwtService } from '@nestjs/jwt';
 import { MulterModule } from '@nestjs/platform-express';
 import { jwtConstants } from 'src/auth/constants';
 import { AuthService } from 'src/auth/auth.service';
+import { User } from 'src/users/entities/user.entity';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Article]),
+    TypeOrmModule.forFeature([Article, User]),
     UsersModule,
     JwtModule.register({
       secret: jwtConstants.secret,
@@ -26,6 +27,6 @@ import { AuthService } from 'src/auth/auth.service';
   ],
   controllers: [ArticlesController],
   providers: [ArticlesService, JwtStrategy, JwtService, AuthService],
-  exports: [TypeOrmModule],
+  exports: [TypeOrmModule, ArticlesService],
 })
 export class ArticlesModule {}

@@ -1,3 +1,4 @@
+import { Comments } from './../../comments/entities/comments.entity';
 import slugify from 'slugify';
 import { User } from 'src/users/entities/user.entity';
 import {
@@ -5,6 +6,7 @@ import {
   Column,
   Entity,
   ManyToOne,
+  OneToMany,
   PrimaryGeneratedColumn,
 } from 'typeorm';
 
@@ -27,6 +29,9 @@ export class Article {
 
   @Column({ unique: true })
   slug: string;
+
+  @OneToMany(() => Comments, (comments) => comments.article)
+  comments: Comments[];
 
   @BeforeInsert()
   generateSlug() {

@@ -3,7 +3,7 @@ import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from './entities/user.entity';
-import { Repository } from 'typeorm';
+import { MoreThan, Repository } from 'typeorm';
 import { InjectQueue } from '@nestjs/bull';
 import { Queue } from 'bull';
 import { Email_Queue } from '../constants';
@@ -15,12 +15,14 @@ import {
   paginate,
   Pagination,
 } from 'nestjs-typeorm-paginate';
+import { MailerService } from '@nestjs-modules/mailer';
 
 @Injectable()
 export class UsersService {
   constructor(
     @InjectRepository(User) private readonly userRepository: Repository<User>,
     @InjectQueue(Email_Queue) private readonly emailQueue: Queue,
+    private readonly mailerService: MailerService,
   ) {}
 
   async findUserById(id): Promise<User | undefined> {
@@ -36,13 +38,47 @@ export class UsersService {
     if (userExists) {
       throw new HttpException('Email already taken', HttpStatus.BAD_REQUEST);
     }
+
     const saltRounds = 10;
     createUserDto.password = await bcrypt.hash(
       createUserDto.password,
       saltRounds,
     );
     await this.sendEmail(createUserDto.email);
-    return this.userRepository.save(createUserDto);
+    const user = this.userRepository.create(createUserDto);
+
+    return await this.userRepository.save(user);
+  }
+
+  async sendActivationEmail(user: User): Promise<void> {
+    const link = `http://localhost:3000/account/active/${user.activationToken}`;
+    console.log(link);
+    await this.mailerService.sendMail({
+      to: user.email,
+      subject: 'Welcome to Blog Server',
+      template: './welcome',
+    });
+  }
+
+  async activateUser(activationToken: string): Promise<User> {
+    const user = await this.userRepository.findOne({
+      where: {
+        activationToken,
+        activeExpires: MoreThan(new Date()),
+      },
+    });
+
+    if (!user) {
+      throw new HttpException(
+        'Activation token is invalid or has expired',
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+
+    user.active = true;
+    user.activationToken = null;
+    user.activeExpires = null;
+    return this.userRepository.save(user);
   }
 
   findAll(): Observable<User[]> {

@@ -70,4 +70,21 @@ export class UsersController {
   remove(@Param('id') id: string): Promise<void> {
     return this.usersService.remove(+id);
   }
+
+  // @Get('active/:activeToken')
+  // async activateUser(
+  //   @Param('activeToken') activeToken: string,
+  //   @Res() res: Response,
+  //   @Next() next: NextFunction,
+  // ) {
+  //   try {
+  //     const user = await this.usersService.activateUser(activeToken);
+  //     res.render('message', {
+  //       title: 'Activation Success!',
+  //       content: `${user.username}, please <a href="/account/login">login</a>`,
+  //     });
+  //   } catch (err) {
+  //     next(err);
+  //   }
+  // }
 }
