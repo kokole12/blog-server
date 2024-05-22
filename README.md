@@ -9,6 +9,7 @@ A simple Blog API that implements key concepts of backend development, including
 - Comment creation and retrieval from the database
 - Image processing and validation
 - likes feature
+- email account verification and activation
 
 ## Programming languages
 - Typescript
