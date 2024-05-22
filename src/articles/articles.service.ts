@@ -1,7 +1,6 @@
 import { Article } from 'src/articles/entities/article.entity';
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { CreateArticleDto } from './dto/create-article.dto';
-import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { UsersService } from 'src/users/users.service';
 import { JwtService } from '@nestjs/jwt';
@@ -12,6 +11,7 @@ import {
   Pagination,
 } from 'nestjs-typeorm-paginate';
 import { UpdateArticleDto } from './dto/update-article.dto';
+import { Repository } from 'typeorm';
 
 @Injectable()
 export class ArticlesService {
@@ -155,5 +155,29 @@ export class ArticlesService {
       where: { author: userId },
     });
     return userArticles;
+  }
+
+  async search(
+    searchFields: Array<keyof Article>,
+    search: string,
+  ): Promise<{ items: Article[]; totalCount: number }> {
+    if (typeof search !== 'string') {
+      throw new Error('Search term must be a string');
+    }
+
+    const queryBuilder = this.articleRepository.createQueryBuilder('alias');
+    const lowerSearch = search.toLowerCase();
+
+    searchFields.forEach((field, index) => {
+      const condition = `LOWER(alias.${String(field)}) LIKE :search`;
+      if (index === 0) {
+        queryBuilder.where(condition, { search: `%${lowerSearch}%` });
+      } else {
+        queryBuilder.orWhere(condition, { search: `%${lowerSearch}%` });
+      }
+    });
+
+    const [items, totalCount] = await queryBuilder.getManyAndCount();
+    return { items, totalCount };
   }
 }

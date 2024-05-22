@@ -13,23 +13,30 @@ import {
   DefaultValuePipe,
   ParseIntPipe,
   Patch,
+  HttpException,
+  HttpStatus,
 } from '@nestjs/common';
 import { ArticlesService } from './articles.service';
 import { CreateArticleDto } from './dto/create-article.dto';
 import { Request } from 'express';
 import { AuthGuard } from '@nestjs/passport';
-import { ApiTags } from '@nestjs/swagger';
+import { ApiOperation, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
 import { extname } from 'path';
 import { IPaginationOptions, Pagination } from 'nestjs-typeorm-paginate';
 import { Article } from './entities/article.entity';
 import { UpdateArticleDto } from './dto/update-article.dto';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
 
 @ApiTags('Articles')
 @Controller('articles')
 export class ArticlesController {
-  constructor(private readonly articlesService: ArticlesService) {}
+  constructor(
+    private readonly articlesService: ArticlesService,
+    @InjectRepository(Article) private readonly repository: Repository<Article>,
+  ) {}
 
   @Post()
   @UseGuards(AuthGuard('jwt'))
@@ -69,6 +76,37 @@ export class ArticlesController {
     return this.articlesService.paginate(options);
   }
 
+  @Get()
+  @ApiOperation({ summary: 'Search items by fields' })
+  @ApiQuery({
+    name: 'fields',
+    type: String,
+    isArray: true,
+    description: 'Fields to search by',
+    required: false,
+  })
+  @ApiQuery({ name: 'search', type: String, description: 'Search term' })
+  @ApiResponse({
+    status: 200,
+    description: 'Successful search',
+    type: [Article],
+  })
+  @ApiResponse({ status: 400, description: 'Invalid search term' })
+  async search(
+    @Query('fields') fields: string,
+    @Query('search') search: string,
+  ): Promise<{ items: Article[]; totalCount: number }> {
+    if (!Array.isArray(fields) || typeof search !== 'string') {
+      throw new HttpException(
+        'Invalid query parameters',
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+
+    const searchFields = fields.split(',') as Array<keyof Article>;
+
+    return this.articlesService.search(searchFields, search);
+  }
   @UseGuards(AuthGuard('jwt'))
   @Get(':id')
   findOne(@Param('id', ParseIntPipe) id: number, @Req() req: Request) {
