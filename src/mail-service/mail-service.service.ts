@@ -25,12 +25,12 @@ export class MailService {
     return 'Hello World!';
   }
 
-  async sendMailTemplate(): Promise<void> {
+  async sendMailTemplate(email: string): Promise<void> {
     try {
       await this.mailerService.sendMail({
-        to: this.toEmail,
+        to: email,
         from: this.fromEmail,
-        subject: 'Testing Node Mailer with NestJS',
+        subject: 'Thank you for using blog-server',
         template: './welcome',
       });
     } catch (error) {
