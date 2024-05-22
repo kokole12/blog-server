@@ -4,10 +4,10 @@ import { Article } from './../../articles/entities/article.entity';
 @Entity()
 export class Comments {
   @PrimaryGeneratedColumn()
-  id: number;
+  commentid: number;
 
-  @Column()
-  comment: string;
+  @Column({ nullable: true })
+  comment?: string;
 
   @ManyToOne(() => Article, (article) => article.comments)
   article: Article;

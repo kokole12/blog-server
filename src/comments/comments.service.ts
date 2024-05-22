@@ -48,10 +48,6 @@ export class CommentsService {
       throw new NotFoundException('Article not found');
     }
 
-    return this.commentRepository
-      .createQueryBuilder('comment')
-      .leftJoinAndSelect('comment.article', 'article')
-      .where('article.id = :id', { id })
-      .getMany();
+    return this.commentRepository.find();
   }
 }

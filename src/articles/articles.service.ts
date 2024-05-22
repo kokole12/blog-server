@@ -23,8 +23,8 @@ export class ArticlesService {
     private readonly authService: AuthService,
   ) {}
 
-  async findArticleById(id): Promise<Article> {
-    return this.articleRepository.findOneBy({ id });
+  async findArticleById(articleid): Promise<Article> {
+    return this.articleRepository.findOneBy({ articleid });
   }
 
   async create(
@@ -83,16 +83,19 @@ export class ArticlesService {
     }
   }
 
-  async findOne(req: any, id: number): Promise<Article> {
+  async findOne(req: any, articleid: number): Promise<Article> {
     console.log(req.user);
     if (!req.user) {
       throw new HttpException('Unauthorized', HttpStatus.UNAUTHORIZED);
     }
 
-    const article = await this.articleRepository.findOneBy({ id });
+    const article = await this.articleRepository.findOneBy({ articleid });
 
     if (!article) {
-      throw new HttpException(`No post with id ${id}`, HttpStatus.BAD_REQUEST);
+      throw new HttpException(
+        `No post with id ${articleid}`,
+        HttpStatus.BAD_REQUEST,
+      );
     }
 
     return article;
@@ -100,7 +103,7 @@ export class ArticlesService {
 
   async paginate(options: IPaginationOptions): Promise<Pagination<Article>> {
     const qb = this.articleRepository.createQueryBuilder('q');
-    qb.orderBy('q.id', 'DESC');
+    qb.orderBy('q.articleid', 'DESC');
 
     return paginate<Article>(qb, options);
   }

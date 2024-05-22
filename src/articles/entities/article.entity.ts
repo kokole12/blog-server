@@ -13,7 +13,7 @@ import {
 @Entity()
 export class Article {
   @PrimaryGeneratedColumn()
-  id: number;
+  articleid: number;
 
   @Column()
   title: string;
