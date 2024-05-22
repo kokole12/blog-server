@@ -15,6 +15,9 @@ import {
   Patch,
   HttpException,
   HttpStatus,
+  ParseFilePipe,
+  MaxFileSizeValidator,
+  FileTypeValidator,
 } from '@nestjs/common';
 import { ArticlesService } from './articles.service';
 import { CreateArticleDto } from './dto/create-article.dto';
@@ -59,7 +62,15 @@ export class ArticlesController {
   create(
     @Body() createArticleDto: CreateArticleDto,
     @Req() req: Request,
-    @UploadedFile() file: Express.Multer.File,
+    @UploadedFile(
+      new ParseFilePipe({
+        validators: [
+          new MaxFileSizeValidator({ maxSize: 1000 }),
+          new FileTypeValidator({ fileType: 'image/(jpeg|jpg|png|webp)' }),
+        ],
+      }),
+    )
+    file: Express.Multer.File,
   ) {
     return this.articlesService.create(createArticleDto, req, file);
   }
