@@ -17,6 +17,8 @@ A simple Blog API that implements key concepts of backend development, including
 - Redis
 - PassportJS
 - swagger
+- Mysql
+-Typeorm
 ## Current Status
 - Incomplete and still in development
 
