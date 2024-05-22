@@ -10,6 +10,9 @@ A simple Blog API that implements key concepts of backend development, including
 - Image processing and validation
 - likes feature
 
+## Programming languages
+- Typescript
+
 ## Tools and Frameworks
 - Nodemailer
 - BullMQ
@@ -18,7 +21,7 @@ A simple Blog API that implements key concepts of backend development, including
 - PassportJS
 - swagger
 - Mysql
--Typeorm
+- Typeorm
 ## Current Status
 - Incomplete and still in development
 
