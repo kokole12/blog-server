@@ -7,6 +7,8 @@ A simple Blog API that implements key concepts of backend development, including
 - Article creation and all CRUD operations for the blog site
 - Authentication and authorization
 - Comment creation and retrieval from the database
+- Image processing and validation
+- likes feature
 
 ## Tools and Frameworks
 - Nodemailer
@@ -14,6 +16,9 @@ A simple Blog API that implements key concepts of backend development, including
 - NestJS
 - Redis
 - PassportJS
-
+- swagger
 ## Current Status
 - Incomplete and still in development
+
+## Author
+kokole Ismail - kokoleismail886@gmail.com
