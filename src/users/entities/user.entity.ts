@@ -7,6 +7,7 @@ import {
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import * as crypto from 'crypto';
+import { Exclude } from 'class-transformer';
 
 @Entity()
 export class User {
@@ -20,6 +21,7 @@ export class User {
   email: string;
 
   @Column()
+  @Exclude()
   password: string;
 
   @OneToMany(() => Article, (article) => article.author)
@@ -33,6 +35,10 @@ export class User {
 
   @Column()
   activeExpires?: Date;
+
+  constructor(partial: Partial<User>) {
+    Object.assign(this, partial);
+  }
 
   @BeforeInsert()
   generateActivationToken() {

@@ -25,8 +25,8 @@ export class UsersService {
     private readonly mailerService: MailerService,
   ) {}
 
-  async findUserById(id): Promise<User | undefined> {
-    return await this.userRepository.findOne(id);
+  async findUserById(id: number): Promise<User | undefined> {
+    return this.userRepository.findOne({ where: { id } });
   }
 
   async findUserByEmail(email: string): Promise<User | undefined> {
@@ -44,19 +44,23 @@ export class UsersService {
       createUserDto.password,
       saltRounds,
     );
-    await this.sendEmail(createUserDto.email);
-    const user = this.userRepository.create(createUserDto);
 
-    return await this.userRepository.save(user);
+    const user = this.userRepository.create(createUserDto);
+    await this.sendActivationEmail(user);
+
+    return this.userRepository.save(user);
   }
 
   async sendActivationEmail(user: User): Promise<void> {
     const link = `http://localhost:3000/account/active/${user.activationToken}`;
-    console.log(link);
+    console.log(link); // Consider including this link in the email body
     await this.mailerService.sendMail({
       to: user.email,
       subject: 'Welcome to Blog Server',
       template: './welcome',
+      context: {
+        activationLink: link,
+      },
     });
   }
 
