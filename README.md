@@ -19,6 +19,7 @@ A simple Blog API that implements key concepts of backend development, including
 - BullMQ
 - NestJS
 - Redis
+- Docker
 - PassportJS
 - swagger
 - Mysql
