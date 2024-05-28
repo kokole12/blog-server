@@ -13,7 +13,7 @@ services:
       - DB_PORT=3306
       - DB_USER=root
       - DB_PASSWORD=rootpassword
-      - DB_NAME=nestdb
+      - DB_NAME=blogdb
       - REDIS_HOST=redis
       - REDIS_PORT=6379
     depends_on:
@@ -28,7 +28,7 @@ services:
     image: mysql:8.0
     environment:
       MYSQL_ROOT_PASSWORD: rootpassword
-      MYSQL_DATABASE: nestdb
+      MYSQL_DATABASE: blogdb
       MYSQL_USER: root
       MYSQL_PASSWORD: rootpassword
     ports:
